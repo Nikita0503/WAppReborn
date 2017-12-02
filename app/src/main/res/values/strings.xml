@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">WAppReborn</string>
+    <string name="tempDay">Day</string>
+    <string name="tempNight">Night</string>
+    <string name="city">City</string>
+    <string name="date">Date</string>
+    <string name="condition">Condition</string>
+    <string name="less">◁</string>
+    <string name="more">▷</string>
+    <string name="check">Check</string>
+    <string name="error">Error</string>
+    <string name="internetConnection">No internet connection. Go to the settings for the Wi-Fi?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="title_activity_map">Map</string>
+</resources>

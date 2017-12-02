@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1185F5"
+    tools:context="com.example.nik.weatherapplication.MainActivity">
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="60dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="31dp"
+        android:layout_toLeftOf="@+id/imageViewMarker"
+        android:layout_toStartOf="@+id/imageViewMarker"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:textColor="@color/textColor"
+        android:textColorLink="@color/colorPrimaryDark" />
+
+    <TextView
+        android:id="@+id/textViewDate"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="@string/date"
+        android:textColor="@color/textColor"
+        android:textSize="36sp"
+        tools:ignore="HardcodedText"
+        tools:layout_editor_absoluteX="40dp"
+        tools:layout_editor_absoluteY="31dp"
+        android:layout_below="@+id/editText"
+        android:layout_alignLeft="@+id/editText"
+        android:layout_alignStart="@+id/editText"
+        android:layout_marginTop="20dp"
+        android:layout_alignRight="@+id/textViewCondition"
+        android:layout_alignEnd="@+id/textViewCondition"
+        android:layout_marginRight="44dp"
+        android:layout_marginEnd="44dp" />
+
+    <TextView
+
+        android:id="@+id/textViewDay"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViewNight"
+        android:layout_alignLeft="@+id/editText"
+        android:layout_alignStart="@+id/editText"
+        android:text="@string/tempDay"
+        android:textColor="@color/textColor"
+        android:textSize="52sp"
+        tools:layout_editor_absoluteX="40dp"
+        tools:layout_editor_absoluteY="127dp"
+        android:layout_toLeftOf="@+id/button3"
+        android:layout_toStartOf="@+id/button3"
+        android:layout_marginRight="21dp"
+        android:layout_marginEnd="21dp" />
+
+    <TextView
+        android:id="@+id/textViewNight"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViewCondition"
+        android:layout_alignLeft="@+id/textViewDay"
+        android:layout_alignStart="@+id/textViewDay"
+        android:text="@string/tempNight"
+        android:textColor="@color/textColor"
+        android:textSize="36sp"
+        tools:layout_editor_absoluteX="40dp"
+        tools:layout_editor_absoluteY="127dp"
+        android:layout_marginRight="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_alignRight="@+id/textViewDay"
+        android:layout_alignEnd="@+id/textViewDay" />
+
+
+    <TextView
+        android:id="@+id/textViewPlace"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:text="@string/city"
+        android:textSize="16sp"
+        android:textColor="@color/textColor"
+        android:layout_below="@+id/textViewDate"
+        android:layout_alignLeft="@+id/textViewDate"
+        android:layout_alignStart="@+id/textViewDate"
+        android:layout_alignRight="@+id/textViewNight"
+        android:layout_alignEnd="@+id/textViewNight" />
+
+    <TextView
+        android:id="@+id/textViewCondition"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonCheck"
+        android:layout_alignLeft="@+id/textViewNight"
+        android:layout_alignStart="@+id/textViewNight"
+        android:layout_marginBottom="18dp"
+        android:text="@string/condition"
+        android:textColor="@color/textColor"
+        android:textSize="32sp" />
+
+    <Button
+        android:textStyle="bold"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/textColor"
+        android:id="@+id/buttonCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/check"
+        tools:ignore="HardcodedText"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="14dp" />
+
+    <Button
+        android:alpha="0.0"
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/textColor"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editText"
+        android:layout_toLeftOf="@+id/buttonCheck"
+        android:layout_toStartOf="@+id/buttonCheck"
+        android:layout_marginRight="30dp"
+        android:layout_marginEnd="30dp" />
+
+    <Button
+        android:alpha="0.0"
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/textColor"
+
+
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/buttonCheck"
+        android:layout_below="@+id/editText"
+        android:layout_marginLeft="26dp"
+        android:layout_marginStart="26dp"
+        android:layout_toRightOf="@+id/buttonCheck" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:srcCompat="@drawable/empty"
+        android:layout_below="@+id/textViewPlace"
+        android:layout_toLeftOf="@+id/textViewMore"
+        android:layout_toStartOf="@+id/textViewMore" />
+
+    <TextView
+        android:textColor="@color/textColor"
+        android:textSize="36sp"
+        android:id="@+id/textViewLess"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:text="@string/less" />
+
+    <TextView
+        android:textColor="@color/textColor"
+        android:textSize="36dp"
+        android:id="@+id/textViewMore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/textViewLess"
+        android:text="@string/more" />
+
+    <ImageView
+        android:id="@+id/imageViewMarker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/marker"
+        android:layout_above="@+id/button3"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <ImageView
+        android:id="@+id/imageViewMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageViewMarker"
+        android:layout_toLeftOf="@+id/imageViewMarker"
+        android:layout_toStartOf="@+id/imageViewMarker"
+        android:src="@drawable/earth" />
+
+</RelativeLayout>

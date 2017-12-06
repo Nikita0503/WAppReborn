@@ -1,18 +1,9 @@
 package com.example.nikita.wappreborn.screen.main;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.example.nikita.wappreborn.R;
 import com.example.nikita.wappreborn.data.network.ApiUtils;
-import com.example.nikita.wappreborn.data.objects.OpenWeatherMap;
-import com.example.nikita.wappreborn.data.objects.SearchLocation;
+import com.example.nikita.wappreborn.data.model.OpenWeatherMap;
+import com.example.nikita.wappreborn.data.model.SearchLocation;
 
 import java.util.Date;
 
@@ -77,7 +68,7 @@ public class MainPresenter implements MainContract.IMainPresenter{
     @Override
     public void fetchWeather() {
         Flowable<OpenWeatherMap> weather = mApiUtils.getAnswers(mMainView.getCityFromView());
-        mDisposables.add(weather.subscribeOn(Schedulers.newThread())
+        mDisposables.add(weather.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSubscriber<OpenWeatherMap>() {
                     @Override
@@ -107,7 +98,7 @@ public class MainPresenter implements MainContract.IMainPresenter{
         double lat = coord[LAT];
         double lon = coord[LON];
         Flowable<SearchLocation> weather = mApiUtils.getAnswers(lat, lon);
-        mDisposables.add(weather.subscribeOn(Schedulers.newThread())
+        mDisposables.add(weather.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSubscriber<SearchLocation>() {
                     @Override

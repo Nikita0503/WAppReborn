@@ -1,8 +1,5 @@
 
-package com.example.nikita.wappreborn.data.objects;
-
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+package com.example.nikita.wappreborn.data.model;
 
 public class Weather {
     private int id;

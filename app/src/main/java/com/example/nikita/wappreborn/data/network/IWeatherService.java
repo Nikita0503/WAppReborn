@@ -4,8 +4,8 @@ package com.example.nikita.wappreborn.data.network;
  * Created by Nikita on 19.10.2017.
  */
 
-import com.example.nikita.wappreborn.data.objects.SearchLocation;
-import com.example.nikita.wappreborn.data.objects.OpenWeatherMap;
+import com.example.nikita.wappreborn.data.model.SearchLocation;
+import com.example.nikita.wappreborn.data.model.OpenWeatherMap;
 
 import io.reactivex.Flowable;
 import retrofit2.http.GET;

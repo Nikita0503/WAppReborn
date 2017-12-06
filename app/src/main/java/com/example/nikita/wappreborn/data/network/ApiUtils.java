@@ -1,7 +1,7 @@
 package com.example.nikita.wappreborn.data.network;
 
-import com.example.nikita.wappreborn.data.objects.SearchLocation;
-import com.example.nikita.wappreborn.data.objects.OpenWeatherMap;
+import com.example.nikita.wappreborn.data.model.SearchLocation;
+import com.example.nikita.wappreborn.data.model.OpenWeatherMap;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 import io.reactivex.Flowable;

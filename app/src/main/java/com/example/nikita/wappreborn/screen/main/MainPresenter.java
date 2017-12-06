@@ -18,7 +18,6 @@ import io.reactivex.subscribers.DisposableSubscriber;
  */
 
 public class MainPresenter implements MainContract.IMainPresenter{
-    private static final int SOME = 123;
     private static final int LAT = 0;
     private static final int LON = 1;
     private static final int ID_CLEARSKY = 800;

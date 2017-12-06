@@ -1,15 +1,20 @@
 package com.example.nikita.wappreborn.screen.main;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,18 +25,20 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.example.nikita.wappreborn.R;
-import com.example.nikita.wappreborn.presenter.MainPresenter;
 import com.example.nikita.wappreborn.screen.map.MapActivity;
 
-public class MainActivity extends AppCompatActivity implements IMainView{
+public class MainActivity extends AppCompatActivity implements MainContract.IMainView {
 
+    private static final int LAT = 0;
+    private static final int LON = 1;
     private final static int REQUEST_GET_WEATHER_ID = 1;
     private final static int REQUEST_GET_LOCATION_ID = 2;
     private final static int REQUEST_GET_MAP_ID = 3;
-    private final static int DIALOG_ERROR = 1;
+    private final static int CONNECTION_ERROR = 1;
     private final static String SAVED_TEXT = "saved_text";
 
     private double mLon;
@@ -64,8 +71,26 @@ public class MainActivity extends AppCompatActivity implements IMainView{
         setFullScreen();
         defineViews();
         setListeners();
-        mMainPresenter = new MainPresenter(this, getApplicationContext());
-        loadText();
+        mMainPresenter = new MainPresenter(this);
+        loadCity();
+        setNotEnabledButtonsInView();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMainPresenter.stop();
+        mMainPresenter = null;
+    }
+
+    @Override
+    public void showNetworkConnectionError() {
+        showDialog(CONNECTION_ERROR);
+    }
+
+    @Override
+    public void showDataError(String error) {
+        Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -74,69 +99,77 @@ public class MainActivity extends AppCompatActivity implements IMainView{
     }
 
     @Override
-    public String getCity() {
+    public double[] getCoordinates() {
+        double coord[] = new double[2];
+        try {
+            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return null;
+            }
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            double lat = location.getLatitude();
+            double lon = location.getLongitude();
+            coord[LAT] = lat;
+            coord[LON] = lon;
+        }
+        catch (Exception c){
+            showNetworkConnectionError();
+        }
+        return coord;
+    }
+
+    @Override
+    public String getCityFromView() {
         String city = mCityEditText.getText().toString();
         return city;
     }
 
     @Override
-    public void setLocation(String place) {
+    public void showLocationInView(String place) {
         mCityEditText.setText(place);
     }
 
     @Override
-    public void setDate(String date) {
+    public void showDateInView(String date) {
         mDateTextView.setText(date);
     }
 
     @Override
-    public void setCity(String city) {
+    public void showCityInView(String city) {
         mPlaceTextView.setText(city);
     }
 
     @Override
-    public void setTemperatureDay(String temp) {
+    public void showTemperatureDayInView(String temp) {
         mTempDayTextView.setText(temp);
     }
 
     @Override
-    public void setTemperatureNight(String temp) {
+    public void showTemperatureNightInView(String temp) {
         mTempNightTextView.setText(temp);
     }
 
     @Override
-    public void setCondition(String condition) {
+    public void showConditionInView(String condition) {
         mConditionTextView.setText(condition);
     }
 
     @Override
-    public void setImages(int[] id) {
-        mIconImageView.setImageResource(id[0]);
-        mLayout.setBackgroundResource(id[1]);
+    public void showIconImageInView(int id) {
+        mIconImageView.setImageResource(id);
     }
 
     @Override
-    public void setFullScreen() {
-        getSupportActionBar().hide();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-                getWindow().setStatusBarColor(Color.TRANSPARENT);
-            } else {
-                getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            }
-        }
+    public void showBackgroundImageInView(int id){
+        mLayout.setBackgroundResource(id);
     }
 
     @Override
-    public void setLatLon(double[] coord) {
+    public void setCoordinates(double[] coord) {
         mLat = coord[0];
         mLon = coord[1];
-        Intent intent = new Intent(getApplicationContext(), MapActivity.class);
-        intent.putExtra("lat", mLat);
-        intent.putExtra("lon", mLon);
-        startActivity(intent);
     }
 
     @Override
@@ -164,6 +197,25 @@ public class MainActivity extends AppCompatActivity implements IMainView{
         mConditionTextView.setTypeface(typeFace);
         mCheckButton.setTypeface(typeFace);
     }
+    @Override
+    public void startMapActivity(){
+        Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+        intent.putExtra("lat", mLat);
+        intent.putExtra("lon", mLon);
+        startActivity(intent);
+    }
+
+    @Override
+    public void setEnabledButtonsInView() {
+        mPlusButton.setEnabled(true);
+        mMinusButton.setEnabled(true);
+    }
+
+    @Override
+    public void setNotEnabledButtonsInView() {
+        mPlusButton.setEnabled(false);
+        mMinusButton.setEnabled(false);
+    }
 
     @Override
     public void setListeners() {
@@ -171,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements IMainView{
         {
             @Override
             public void onClick(View view) {
-                isOnline(REQUEST_GET_MAP_ID);
+                mMainPresenter.fetchCoordinates();
             }
         });
 
@@ -179,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements IMainView{
         {
             @Override
             public void onClick(View view) {
-                isOnline(REQUEST_GET_LOCATION_ID);
+                mMainPresenter.fetchLocation();
             }
         });
 
@@ -190,8 +242,8 @@ public class MainActivity extends AppCompatActivity implements IMainView{
                 mCurrentDay = 0;
                 mMoreTextView.setAlpha(1);
                 mLessTextView.setAlpha(0);
-                saveText();
-                isOnline(REQUEST_GET_WEATHER_ID);
+                saveCity();
+                mMainPresenter.fetchWeather();
             }
         });
 
@@ -235,12 +287,7 @@ public class MainActivity extends AppCompatActivity implements IMainView{
     }
 
     @Override
-    public Context getWApplicationContext(){
-        return getApplicationContext();
-    }
-
-    @Override
-    public void saveText() {
+    public void saveCity() {
         mPref = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor ed = mPref.edit();
         ed.putString(SAVED_TEXT, mCityEditText.getText().toString());
@@ -248,53 +295,28 @@ public class MainActivity extends AppCompatActivity implements IMainView{
     }
 
     @Override
-    public void loadText() {
+    public void loadCity() {
         mPref = getPreferences(MODE_PRIVATE);
         String savedText = mPref.getString(SAVED_TEXT, "");
         mCityEditText.setText(savedText);
     }
 
     @Override
-    public void isOnline(int id) {
-        Handler h = new Handler(getApplicationContext().getMainLooper());
-        h.post(new Runnable() {
-            @Override
-            public void run() {
-                if (checkInternet()) {
-                    switch (id)
-                    {
-                        case REQUEST_GET_WEATHER_ID:
-                            mMainPresenter.getWeather();
-                            break;
-                        case REQUEST_GET_LOCATION_ID:
-                            mMainPresenter.getLocation();
-                            break;
-                        case REQUEST_GET_MAP_ID:
-                            mMainPresenter.getLatLon();;
-                            break;
-                    }
-                } else {
-                    showDialog(DIALOG_ERROR);
-                }
+    public void setFullScreen() {
+        getSupportActionBar().hide();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                getWindow().setStatusBarColor(Color.TRANSPARENT);
+            } else {
+                getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             }
-        });
-    }
-    @Override
-    public boolean checkInternet() {
-        try {
-            Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 www.google.com");
-            int returnVal = p1.waitFor();
-            boolean reachable = (returnVal==0);
-            return reachable;
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
-        return false;
     }
 
     protected Dialog onCreateDialog(int id) {
-        if (id == DIALOG_ERROR) {
+        if (id == CONNECTION_ERROR) {
             AlertDialog.Builder adb = new AlertDialog.Builder(this);
             adb.setTitle(R.string.error);
             adb.setMessage(R.string.internetConnection);

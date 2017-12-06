@@ -121,7 +121,7 @@ public class MainPresenter implements MainContract.IMainPresenter{
     @Override
     public void fetchCoordinates() {
         Flowable<OpenWeatherMap> weather = mApiUtils.getAnswers(mMainView.getCityFromView());
-        mDisposables.add(weather.subscribeOn(Schedulers.newThread())
+        mDisposables.add(weather.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSubscriber<OpenWeatherMap>() {
                     @Override

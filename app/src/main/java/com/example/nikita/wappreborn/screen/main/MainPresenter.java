@@ -18,6 +18,7 @@ import io.reactivex.subscribers.DisposableSubscriber;
  */
 
 public class MainPresenter implements MainContract.IMainPresenter{
+    private static final int SOME_CONST = 0;
     private static final int LAT = 0;
     private static final int LON = 1;
     private static final int ID_CLEARSKY = 800;
@@ -30,7 +31,7 @@ public class MainPresenter implements MainContract.IMainPresenter{
     private static final double CONST_FOR_TRANSLATION_TEMPERATURE_1 = 1.8;
     private static final double CONST_FOR_TRANSLATION_TEMPERATURE_2 = 459.67;
     private static final int CONST_FOR_TRANSLATION_TEMPERATURE_3 = 32;
-    private static final double CONST_FOR_TRANSLATION_TEMPERATURE_4 = 0.555555555556;
+    private static final double CONST_FOR_TRANSLATION_TEMPERATURE_4 = 0.55555555556;
     private static final int BEGINNING_OF_DAY_NAME = 4;
     private static final int END_OF_DAY_NAME = 11;
     private static final int BEGINNING_OF_DAY_NAME_FROM_API = 0;

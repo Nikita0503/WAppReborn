@@ -1,15 +1,18 @@
 package com.example.nikita.wappreborn.screen.main;
 
 import com.example.nikita.wappreborn.R;
+import com.example.nikita.wappreborn.data.model.Coordinates;
 import com.example.nikita.wappreborn.data.network.ApiUtils;
 import com.example.nikita.wappreborn.data.model.OpenWeatherMap;
 import com.example.nikita.wappreborn.data.model.SearchLocation;
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 
 import java.util.Date;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
 
@@ -18,15 +21,7 @@ import io.reactivex.subscribers.DisposableSubscriber;
  */
 
 public class MainPresenter implements MainContract.IMainPresenter{
-    private static final int LAT = 0;
-    private static final int LON = 1;
-    private static final int ID_CLEARSKY = 800;
-    private static final int ID_SUNNYCLOUD = 8;
-    private static final int ID_CLOUDS = 7;
-    private static final int ID_SNOW = 6;
-    private static final int ID_RAIN = 5;
-    private static final int ID_DRIZZLE = 3;
-    private static final int ID_THUNDER = 2;
+
     private static final double CONST_FOR_TRANSLATION_TEMPERATURE_1 = 1.8;
     private static final double CONST_FOR_TRANSLATION_TEMPERATURE_2 = 459.67;
     private static final int CONST_FOR_TRANSLATION_TEMPERATURE_3 = 32;
@@ -42,33 +37,25 @@ public class MainPresenter implements MainContract.IMainPresenter{
     private static final String FRIDAY = "Fri";
     private static final String SATURDAY = "Sat";
     private static final String SUNDAY = "Sun";
-    private static final String CONDITION_FROM_API_LIGHT_SNOW = "light snow";
-    private static final String CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW = "light rain and snow";
-    private static final String CONDITION_FROM_API_LIGHT_SHOWER_SNOW = "light shower snow";
-    private static final String CONDITION_FROM_API_SNOW = "snow";
-    private static final String CONDITION_FROM_API_RAIN_AND_SNOW = "rain and snow";
-    private static final String CONDITION_FROM_API_SHOWER_SNOW = "shower snow";
-    private static final String CONDITION_FROM_API_HEAVY_SNOW = "heavy snow";
-    private static final String CONDITION_FROM_API_HEAVY_SHOWER_SNOW = "heavy shower snow";
-    private static final String CONDITION_FROM_API_LIGHT_RAIN = "light rain";
-    private static final String CONDITION_FROM_API_MODERATE_RAIN = "moderate rain";
-    private String mCondition;
-    private int mIconImageId;
-    private int mBackgroundImageId;
+
     private ApiUtils mApiUtils;
     private MainContract.IMainView mMainView;
     private OpenWeatherMap mWeather;
-    private CompositeDisposable mDisposables;
+    private final CompositeDisposable  mDisposables = new CompositeDisposable();
+
     public MainPresenter(MainContract.IMainView mainView){
-        mApiUtils = new ApiUtils();
         this.mMainView = mainView;
-        start();
     }
 
     @Override
-    public void fetchWeather() {
-        Flowable<OpenWeatherMap> weather = mApiUtils.getAnswers(mMainView.getCityFromView());
-        mDisposables.add(weather.subscribeOn(Schedulers.io())
+    public void start() {
+        mApiUtils = new ApiUtils();
+    }
+
+    @Override
+    public void fetchWeather(String city) {
+        Disposable weather = mApiUtils.getAnswers(city)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSubscriber<OpenWeatherMap>() {
                     @Override
@@ -78,27 +65,21 @@ public class MainPresenter implements MainContract.IMainPresenter{
                     }
                     @Override
                     public void onError(Throwable e) {
-                        if((e.toString()).equals("com.jakewharton.retrofit2.adapter.rxjava2.HttpException: HTTP 404 Not Found")) {
-                            mMainView.showDataError("Unknown city");
-                        }else if(e.toString().equals("com.jakewharton.retrofit2.adapter.rxjava2.HttpException: HTTP 400 Bad Request")){
-                            mMainView.showDataError("Enter correct city");
-                        }else{
-                            mMainView.showNetworkConnectionError();
-                        }
+                        fetchErrors(e);
                     }
                     @Override
                     public void onComplete() {
                         mMainView.setEnabledButtonsInView();
-                    }}));
+                    }});
+        mDisposables.add(weather);
     }
 
     @Override
-    public void fetchLocation() {
-        double[] coord = mMainView.getCoordinates();
-        double lat = coord[LAT];
-        double lon = coord[LON];
-        Flowable<SearchLocation> weather = mApiUtils.getAnswers(lat, lon);
-        mDisposables.add(weather.subscribeOn(Schedulers.io())
+    public void fetchCityWithCoordinates(Coordinates coord) {
+        double lat = coord.latitude;
+        double lon = coord.longitude;
+        Disposable weather = mApiUtils.getAnswers(lat, lon)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSubscriber<SearchLocation>() {
                     @Override
@@ -108,43 +89,44 @@ public class MainPresenter implements MainContract.IMainPresenter{
                     }
                     @Override
                     public void onError(Throwable e) {
-                        if((e.toString()).equals("com.jakewharton.retrofit2.adapter.rxjava2.HttpException: HTTP 404 Not Found")){
-                            mMainView.showDataError("Unknown geolocation");
-                        }else{
-                            mMainView.showNetworkConnectionError();
-                        }
+                        fetchErrors(e);
                     }
                     @Override
-                    public void onComplete() { }}));
+                    public void onComplete() { }});
+        mDisposables.add(weather);
     }
 
+
     @Override
-    public void fetchCoordinates() {
-        Flowable<OpenWeatherMap> weather = mApiUtils.getAnswers(mMainView.getCityFromView());
-        mDisposables.add(weather.subscribeOn(Schedulers.io())
+    public void fetchCoordinatesForMapActivity(String city) {
+        Disposable weather = mApiUtils.getAnswers(city)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSubscriber<OpenWeatherMap>() {
                     @Override
                     public void onNext(OpenWeatherMap weather) {
-                        double coord[] = new double[2];
-                        mWeather = weather;
-                        coord[LAT] = mWeather.getCity().getCoord().getLat();
-                        coord[LON] = mWeather.getCity().getCoord().getLon();
+                        double latitude = weather.getCity().getCoord().getLat();
+                        double longitude = weather.getCity().getCoord().getLon();
+                        Coordinates coord = new Coordinates(latitude, longitude);
                         mMainView.setCoordinates(coord);
-                        mMainView.startMapActivity();
                     }
                     @Override
                     public void onError(Throwable e) {
-                        if((e.toString()).equals("com.jakewharton.retrofit2.adapter.rxjava2.HttpException: HTTP 404 Not Found")) {
-                            mMainView.showDataError("Unknown city");
-                        }else if(e.toString().equals("com.jakewharton.retrofit2.adapter.rxjava2.HttpException: HTTP 400 Bad Request")){
-                            mMainView.showDataError("Enter correct city");
-                        }else{
-                            mMainView.showNetworkConnectionError();
-                        }
+                        fetchErrors(e);
                     }
                     @Override
-                    public void onComplete() { }}));
+                    public void onComplete() { }});
+        mDisposables.add(weather);
+    }
+
+    @Override
+    public void updateData(){
+        mMainView.showDateInView(getDate());
+        mMainView.showCityInView(getCity());
+        mMainView.showTemperatureDayInView(getTemperatureDay());
+        mMainView.showTemperatureNightInView(getTemperatureNight());
+        mMainView.showConditionInView(getCondition());
+        mMainView.showImagesInView(getImagesId());
     }
 
     @Override
@@ -214,76 +196,30 @@ public class MainPresenter implements MainContract.IMainPresenter{
     @Override
     public String getCondition() {
         String condition = mWeather.getList().get(mMainView.getCurrentDay()).getWeather().get(0).getDescription();
-        mCondition = condition;
         return condition;
     }
 
     @Override
-    public void fetchImages() {
+    public int getImagesId() {
         int id = mWeather.getList().get(mMainView.getCurrentDay()).getWeather().get(0).getId();
-        if (id == ID_CLEARSKY) {
-            mIconImageId = R.drawable.sunny;
-            mBackgroundImageId = R.drawable.sunnybackground;
-        } else {
-            switch (id / 100) {
-                case ID_SUNNYCLOUD:;
-                    mIconImageId = R.drawable.sunnycloud;
-                    mBackgroundImageId = R.drawable.sunnycloudbackground;
-                    break;
-                case ID_CLOUDS:
-                    mIconImageId = R.drawable.cloud;
-                    mBackgroundImageId = R.drawable.cloudsbackground;
-                    break;
-                case ID_SNOW:
-                    mIconImageId = R.drawable.snow;
-                    mBackgroundImageId = R.drawable.snowbackground;
-                    break;
-                case ID_RAIN:
-                    mIconImageId = R.drawable.rain;
-                    mBackgroundImageId = R.drawable.rainbackground;
-                    break;
-                case ID_DRIZZLE:
-                    mIconImageId = R.drawable.drizzle;
-                    mBackgroundImageId = R.drawable.drizzlebackground;
-                    break;
-                case ID_THUNDER:
-                    mIconImageId = R.drawable.thunder;
-                    mBackgroundImageId = R.drawable.thunderbackground;
-                    break;
-            }
-        }
-        if (mCondition.equals(CONDITION_FROM_API_LIGHT_SNOW) || mCondition.equals(CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW) || mCondition.equals(CONDITION_FROM_API_LIGHT_SHOWER_SNOW)) {
-            mIconImageId = R.drawable.smallsnow;
-            mBackgroundImageId = R.drawable.snowbackground;
-        }
-        else if (mCondition.equals(CONDITION_FROM_API_SNOW) || mCondition.equals(CONDITION_FROM_API_RAIN_AND_SNOW) || mCondition.equals(CONDITION_FROM_API_SHOWER_SNOW)) {
-            mIconImageId = R.drawable.snow;
-            mBackgroundImageId = R.drawable.snowbackground;
-        }
-        else if (mCondition.equals(CONDITION_FROM_API_HEAVY_SNOW) || mCondition.equals(CONDITION_FROM_API_HEAVY_SHOWER_SNOW)) {
-            mIconImageId = R.drawable.heavysnow;
-            mBackgroundImageId = R.drawable.snowbackground;
-        }
-        else if (mCondition.equals(CONDITION_FROM_API_LIGHT_RAIN)) {
-            mIconImageId = R.drawable.rain;
-            mBackgroundImageId = R.drawable.drizzlebackground;
-        }
-        else if (mCondition.equals(CONDITION_FROM_API_MODERATE_RAIN)) {
-            mIconImageId = R.drawable.drizzle;
-            mBackgroundImageId = R.drawable.rainbackground;
-        }
+        return id;
     }
 
     @Override
-    public void updateData(){
-        mMainView.showDateInView(getDate());
-        mMainView.showCityInView(getCity());
-        mMainView.showTemperatureDayInView(getTemperatureDay());
-        mMainView.showTemperatureNightInView(getTemperatureNight());
-        mMainView.showConditionInView(getCondition());
-        fetchImages();
-        mMainView.showIconImageInView(mIconImageId);
-        mMainView.showBackgroundImageInView(mBackgroundImageId);
+    public void fetchErrors(Throwable e) {
+        if(e instanceof HttpException){
+            int exception = ((HttpException) e).code();
+            switch (exception){
+                case 400:
+                    mMainView.showEmptyLineError();
+                    break;
+                case 404:
+                    mMainView.showEnteredCityError();
+                    break;
+                default:
+                    mMainView.showNetworkConnectionError();
+            }
+        }
     }
 
     public static Date convertUnixTimestampToDate(long timestamp) {
@@ -292,13 +228,7 @@ public class MainPresenter implements MainContract.IMainPresenter{
     }
 
     @Override
-    public void start() {
-        mDisposables = new CompositeDisposable();
-    }
-
-    @Override
     public void stop() {
-        mDisposables.dispose();
         mDisposables.clear();
     }
 }

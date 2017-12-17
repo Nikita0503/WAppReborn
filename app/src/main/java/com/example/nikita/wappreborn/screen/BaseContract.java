@@ -1,4 +1,4 @@
-package com.example.nikita.wappreborn;
+package com.example.nikita.wappreborn.screen;
 
 /**
  * Created by Nikita on 06.12.2017.

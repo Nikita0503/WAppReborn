@@ -32,6 +32,7 @@ import com.example.nikita.wappreborn.screen.map.MapActivity;
 
 public class MainActivity extends AppCompatActivity implements MainContract.IMainView {
 
+    private static final int TEST_GIT = 1;
     private static final int ID_CLEARSKY = 800;
     private static final int ID_SUNNYCLOUD = 8;
     private static final int ID_CLOUDS = 7;

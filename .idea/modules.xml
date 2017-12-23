@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/WAppReborn.iml" filepath="$PROJECT_DIR$/.idea/WAppReborn.iml" />
+      <module fileurl="file://$PROJECT_DIR$/WAppReborn.iml" filepath="$PROJECT_DIR$/WAppReborn.iml" />
+      <module fileurl="file://C:\Users\Inna\AndroidStudioProjects\WAppReborn\.idea\WAppReborn.iml" filepath="C:\Users\Inna\AndroidStudioProjects\WAppReborn\.idea\WAppReborn.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\Inna\AndroidStudioProjects\WAppReborn\app\app.iml" filepath="C:\Users\Inna\AndroidStudioProjects\WAppReborn\app\app.iml" />
     </modules>
   </component>
 </project>

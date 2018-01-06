@@ -28,10 +28,14 @@ import android.widget.Toast;
 
 import com.example.nikita.wappreborn.R;
 import com.example.nikita.wappreborn.data.model.Coordinates;
+import com.example.nikita.wappreborn.data.model.OpenWeatherMap;
 import com.example.nikita.wappreborn.screen.map.MapActivity;
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 
-public class MainActivity extends AppCompatActivity implements MainContract.IMainView {
+import java.util.Date;
 
+public class MainActivity extends AppCompatActivity implements MainContract.View {
+    private final static int CONNECTION_ERROR = 1;
     private static final int ID_CLEARSKY = 800;
     private static final int ID_SUNNYCLOUD = 8;
     private static final int ID_CLOUDS = 7;
@@ -39,6 +43,14 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
     private static final int ID_RAIN = 5;
     private static final int ID_DRIZZLE = 3;
     private static final int ID_THUNDER = 2;
+    private static final int BEGINNING_OF_DAY_NAME = 4;
+    private static final int END_OF_DAY_NAME = 11;
+    private static final int BEGINNING_OF_DAY_NAME_FROM_API = 0;
+    private static final int END_OF_DAY_NAME_FROM_API = 3;
+    private static final double CONST_FOR_TRANSLATION_TEMPERATURE_1 = 1.8;
+    private static final double CONST_FOR_TRANSLATION_TEMPERATURE_2 = 459.67;
+    private static final int CONST_FOR_TRANSLATION_TEMPERATURE_3 = 32;
+    private static final double CONST_FOR_TRANSLATION_TEMPERATURE_4 = 0.55555555556;
     private static final String CONDITION_FROM_API_LIGHT_SNOW = "light snow";
     private static final String CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW = "light rain and snow";
     private static final String CONDITION_FROM_API_LIGHT_SHOWER_SNOW = "light shower snow";
@@ -49,15 +61,23 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
     private static final String CONDITION_FROM_API_HEAVY_SHOWER_SNOW = "heavy shower snow";
     private static final String CONDITION_FROM_API_LIGHT_RAIN = "light rain";
     private static final String CONDITION_FROM_API_MODERATE_RAIN = "moderate rain";
-    private final static int CONNECTION_ERROR = 1;
     private final static String SAVED_TEXT = "saved_text";
+    private static final String MONDAY = "Mon";
+    private static final String TUESDAY = "Tue";
+    private static final String WEDNESDAY = "Wed";
+    private static final String THURSDAY = "Thu";
+    private static final String FRIDAY = "Fri";
+    private static final String SATURDAY = "Sat";
+    private static final String SUNDAY = "Sun";
+    private OpenWeatherMap mWeather;
+
     private int mIconImageId;
     private int mBackgroundImageId;
     private double mLon;
     private double mLat;
     private String mCondition;
     private int mCurrentDay;
-    private MainPresenter mMainPresenter;
+    private Presenter mMainPresenter;
     private SharedPreferences mPref;
 
     private TextView mPlaceTextView;
@@ -83,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
         setFullScreen();
         defineViews();
         setListeners();
-        mMainPresenter = new MainPresenter(this);
+        mMainPresenter = new Presenter(this);
         loadCityToView();
         setNotEnabledButtonsInView();
     }
@@ -92,6 +112,32 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
     protected void onStart(){
         super.onStart();
         mMainPresenter.start();
+    }
+
+    @Override
+    public void defineViews() {
+        mDateTextView =  findViewById(R.id.textViewDate);
+        mTempDayTextView = findViewById(R.id.textViewDay);
+        mTempNightTextView = findViewById(R.id.textViewNight);
+        mPlaceTextView = findViewById(R.id.textViewPlace);
+        mConditionTextView = findViewById(R.id.textViewCondition);
+        mLessTextView = findViewById(R.id.textViewLess);
+        mMoreTextView = findViewById(R.id.textViewMore);
+        mIconImageView = findViewById(R.id.imageView);
+        mLocationMarkerImageView = findViewById(R.id.imageViewMarker);
+        mMapImageView = findViewById(R.id.imageViewMap);
+        mCityEditText = findViewById(R.id.editText);
+        mCheckButton = findViewById(R.id.buttonCheck);
+        mPlusButton = findViewById(R.id.button2);
+        mMinusButton = findViewById(R.id.button3);
+        mLayout = findViewById(R.id.activity_main);
+        Typeface typeFace = Typeface.createFromAsset(getAssets(), "fonts/Hattori_Hanzo.otf");
+        mPlaceTextView.setTypeface(typeFace);
+        mTempDayTextView.setTypeface(typeFace);
+        mTempNightTextView.setTypeface(typeFace);
+        mDateTextView.setTypeface(typeFace);
+        mConditionTextView.setTypeface(typeFace);
+        mCheckButton.setTypeface(typeFace);
     }
 
     @Override
@@ -109,38 +155,14 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
         Toast.makeText(getApplicationContext(), "Unknown city", Toast.LENGTH_SHORT).show();
     }
 
-
     @Override
-    public int getCurrentDay() {
-        return mCurrentDay;
+    public void setEnabledButtonsInView() {
+        mPlusButton.setEnabled(true);
+        mMinusButton.setEnabled(true);
     }
-
-    @Override
-    public Coordinates getCoordinates() {
-        Coordinates coord;
-        try {
-            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            coord = new Coordinates(latitude, longitude);
-            return coord;
-        }
-        catch (Exception c){
-            showNetworkConnectionError();
-            return null;
-        }
-    }
-
-    @Override
-    public String getCityFromView() {
-        String city = mCityEditText.getText().toString();
-        return city;
+    public void setNotEnabledButtonsInView() {
+        mPlusButton.setEnabled(false);
+        mMinusButton.setEnabled(false);
     }
 
     @Override
@@ -149,37 +171,224 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
     }
 
     @Override
+    public void showCoordinatesInView(Coordinates coord) {
+        mLat = coord.latitude;
+        mLon = coord.longitude;
+        startMapActivity();
+    }
+
+    public void startMapActivity(){
+        Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+        intent.putExtra("lat", mLat);
+        intent.putExtra("lon", mLon);
+        startActivity(intent);
+    }
+
+    public void setListeners() {
+        mMapImageView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view) {
+                String city = getCityFromView();
+                mMainPresenter.fetchCoordinatesForMapActivity(city);
+            }
+        });
+
+        mLocationMarkerImageView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view) {
+                Coordinates coord = getCoordinates();
+                mMainPresenter.fetchCityWithCoordinates(coord);
+            }
+        });
+
+        mCheckButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view) {
+                mCurrentDay = 0;
+                mMoreTextView.setAlpha(1);
+                mLessTextView.setAlpha(0);
+                saveCityFromView();
+                String city = getCityFromView();
+                mMainPresenter.fetchWeather(city);
+            }
+        });
+
+        mMinusButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if(mCurrentDay!=6) {
+                    mCurrentDay++;
+                }
+                if(mCurrentDay==5 || mCurrentDay==6) {
+                    mMoreTextView.setAlpha(0);
+                }
+                if(mCurrentDay!=6 && mCurrentDay!=0) {
+                    mMoreTextView.setAlpha(1);
+                    mLessTextView.setAlpha(1);
+                }
+                setUpDateTextView();
+            }
+        });
+
+        mPlusButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if(mCurrentDay!=0) {
+                    mCurrentDay--;
+                }
+                if(mCurrentDay==1 || mCurrentDay==0) {
+                    mLessTextView.setAlpha(0);
+                }
+                if(mCurrentDay!=6 && mCurrentDay!=0) {
+                    mMoreTextView.setAlpha(1);
+                    mLessTextView.setAlpha(1);
+                }
+                setUpDateTextView();
+            }
+        });
+    }
+
+    public void setFullScreen() {
+        getSupportActionBar().hide();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                getWindow().setStatusBarColor(Color.TRANSPARENT);
+            } else {
+                getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            }
+        }
+    }
+
+    public void loadCityToView() {
+        mPref = getPreferences(MODE_PRIVATE);
+        String savedText = mPref.getString(SAVED_TEXT, "");
+        mCityEditText.setText(savedText);
+    }
+
+    @Override
+    public void showWeatherInView(OpenWeatherMap weather){
+        mWeather = weather;
+        setUpDateTextView();
+    }
+
+    public void setUpDateTextView(){
+        showDateInView(getDate());
+        showCityInView(getCity());
+        showTemperatureDayInView(getTemperatureDay());
+        showTemperatureNightInView(getTemperatureNight());
+        showConditionInView(getCondition());
+        showImagesInView(getImagesId());
+    }
+
+    public int getCurrentDay() {
+        return mCurrentDay;
+    }
+
+    public String getDate() {
+        long dateLong = mWeather.getList().get(getCurrentDay()).getDt();
+        Date date = convertUnixTimestampToDate(dateLong);
+        String dateStr = date.toString();
+        String dayOfWeek = "";
+        switch (dateStr.substring(BEGINNING_OF_DAY_NAME_FROM_API, END_OF_DAY_NAME_FROM_API)) {
+            case MONDAY:
+                dayOfWeek = "Monday";
+                break;
+            case TUESDAY:
+                dayOfWeek = "Tuesday";
+                break;
+            case WEDNESDAY:
+                dayOfWeek = "Wednesday";
+                break;
+            case THURSDAY:
+                dayOfWeek = "Thursday";
+                break;
+            case FRIDAY:
+                dayOfWeek = "Friday";
+                break;
+            case SATURDAY:
+                dayOfWeek = "Saturday";
+                break;
+            case SUNDAY:
+                dayOfWeek = "Sunday";
+                break;
+        }
+        return dateStr.substring(BEGINNING_OF_DAY_NAME, END_OF_DAY_NAME) + " " + dayOfWeek;
+    }
+
+    public String getCity() {
+        String city = mWeather.getCity().getName() + " " + mWeather.getCity().getCountry();
+        return city;
+    }
+
+    public String getTemperatureDay() {
+        double tempDouble = mWeather.getList().get(getCurrentDay()).getTemp().getDay();
+        int temp = (int) ((((tempDouble * CONST_FOR_TRANSLATION_TEMPERATURE_1 - CONST_FOR_TRANSLATION_TEMPERATURE_2))
+                - CONST_FOR_TRANSLATION_TEMPERATURE_3) * CONST_FOR_TRANSLATION_TEMPERATURE_4);
+        if (temp > 0) {
+            return String.valueOf("Day +" + temp + "°C");
+        }
+        else{
+            return String.valueOf(String.valueOf("Day " + temp + "°C"));
+        }
+    }
+
+    public String getTemperatureNight() {
+        double tempDouble = mWeather.getList().get(getCurrentDay()).getTemp().getNight();
+        int temp = (int) ((((tempDouble * CONST_FOR_TRANSLATION_TEMPERATURE_1 - CONST_FOR_TRANSLATION_TEMPERATURE_2))
+                - CONST_FOR_TRANSLATION_TEMPERATURE_3) * CONST_FOR_TRANSLATION_TEMPERATURE_4);
+        if (temp > 0) {
+            return String.valueOf("Night +" + temp + "°C");
+        }
+        else {
+            return String.valueOf("Night " + temp + "°C");
+        }
+    }
+
+    public String getCondition() {
+        String condition = mWeather.getList().get(getCurrentDay()).getWeather().get(0).getDescription();
+        return condition;
+    }
+
+
+    public int getImagesId() {
+        int id = mWeather.getList().get(getCurrentDay()).getWeather().get(0).getId();
+        return id;
+    }
+
     public void showDateInView(String date) {
         mDateTextView.setText(date);
     }
 
-    @Override
     public void showCityInView(String city) {
         mPlaceTextView.setText(city);
     }
 
-    @Override
     public void showTemperatureDayInView(String temp) {
         mTempDayTextView.setText(temp);
     }
 
-    @Override
     public void showTemperatureNightInView(String temp) {
         mTempNightTextView.setText(temp);
     }
 
-    @Override
     public void showConditionInView(String condition) {
         mCondition = condition;
         mConditionTextView.setText(condition);
     }
 
-    @Override
     public void showIconImageInView(int id) {
         mIconImageView.setImageResource(id);
     }
 
-    @Override
     public void showImagesInView(int id) {
         if (id == ID_CLEARSKY) {
             mIconImageId = R.drawable.sunny;
@@ -236,163 +445,41 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
         showIconImageInView(mIconImageId);
     }
 
-    @Override
     public void showBackgroundImageInView(int id){
         mLayout.setBackgroundResource(id);
     }
 
-    @Override
-    public void setCoordinates(Coordinates coord) {
-        mLat = coord.latitude;
-        mLon = coord.longitude;
-        startMapActivity();
-    }
-
-    @Override
-    public void defineViews() {
-        mDateTextView =  findViewById(R.id.textViewDate);
-        mTempDayTextView = findViewById(R.id.textViewDay);
-        mTempNightTextView = findViewById(R.id.textViewNight);
-        mPlaceTextView = findViewById(R.id.textViewPlace);
-        mConditionTextView = findViewById(R.id.textViewCondition);
-        mLessTextView = findViewById(R.id.textViewLess);
-        mMoreTextView = findViewById(R.id.textViewMore);
-        mIconImageView = findViewById(R.id.imageView);
-        mLocationMarkerImageView = findViewById(R.id.imageViewMarker);
-        mMapImageView = findViewById(R.id.imageViewMap);
-        mCityEditText = findViewById(R.id.editText);
-        mCheckButton = findViewById(R.id.buttonCheck);
-        mPlusButton = findViewById(R.id.button2);
-        mMinusButton = findViewById(R.id.button3);
-        mLayout = findViewById(R.id.activity_main);
-        Typeface typeFace = Typeface.createFromAsset(getAssets(), "fonts/Hattori_Hanzo.otf");
-        mPlaceTextView.setTypeface(typeFace);
-        mTempDayTextView.setTypeface(typeFace);
-        mTempNightTextView.setTypeface(typeFace);
-        mDateTextView.setTypeface(typeFace);
-        mConditionTextView.setTypeface(typeFace);
-        mCheckButton.setTypeface(typeFace);
-    }
-
-    @Override
-    public void startMapActivity(){
-        Intent intent = new Intent(getApplicationContext(), MapActivity.class);
-        intent.putExtra("lat", mLat);
-        intent.putExtra("lon", mLon);
-        startActivity(intent);
-    }
-
-    @Override
-    public void setEnabledButtonsInView() {
-        mPlusButton.setEnabled(true);
-        mMinusButton.setEnabled(true);
-    }
-
-    @Override
-    public void setNotEnabledButtonsInView() {
-        mPlusButton.setEnabled(false);
-        mMinusButton.setEnabled(false);
-    }
-
-    @Override
-    public void setListeners() {
-        mMapImageView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view) {
-                String city = getCityFromView();
-                mMainPresenter.fetchCoordinatesForMapActivity(city);
+    public Coordinates getCoordinates() {
+        Coordinates coord;
+        try {
+            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return null;
             }
-        });
-
-        mLocationMarkerImageView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view) {
-                Coordinates coord = getCoordinates();
-                mMainPresenter.fetchCityWithCoordinates(coord);
-            }
-        });
-
-        mCheckButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view) {
-                mCurrentDay = 0;
-                mMoreTextView.setAlpha(1);
-                mLessTextView.setAlpha(0);
-                saveCityFromView();
-                String city = getCityFromView();
-                mMainPresenter.fetchWeather(city);
-            }
-        });
-
-        mMinusButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                if(mCurrentDay!=6) {
-                    mCurrentDay++;
-                }
-                if(mCurrentDay==5 || mCurrentDay==6) {
-                    mMoreTextView.setAlpha(0);
-                }
-                if(mCurrentDay!=6 && mCurrentDay!=0) {
-                    mMoreTextView.setAlpha(1);
-                    mLessTextView.setAlpha(1);
-                }
-                mMainPresenter.updateData();
-            }
-        });
-
-        mPlusButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                if(mCurrentDay!=0) {
-                    mCurrentDay--;
-                }
-                if(mCurrentDay==1 || mCurrentDay==0) {
-                    mLessTextView.setAlpha(0);
-                }
-                if(mCurrentDay!=6 && mCurrentDay!=0) {
-                    mMoreTextView.setAlpha(1);
-                    mLessTextView.setAlpha(1);
-                }
-                mMainPresenter.updateData();
-            }
-        });
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            coord = new Coordinates(latitude, longitude);
+            return coord;
+        }
+        catch (Exception c){
+            showNetworkConnectionError();
+            return null;
+        }
     }
 
-    @Override
+    public String getCityFromView() {
+        String city = mCityEditText.getText().toString();
+        return city;
+    }
+
     public void saveCityFromView() {
         mPref = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor ed = mPref.edit();
         ed.putString(SAVED_TEXT, mCityEditText.getText().toString());
         ed.commit();
-    }
-
-    @Override
-    public void loadCityToView() {
-        mPref = getPreferences(MODE_PRIVATE);
-        String savedText = mPref.getString(SAVED_TEXT, "");
-        mCityEditText.setText(savedText);
-    }
-
-    @Override
-    public void setFullScreen() {
-        getSupportActionBar().hide();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-                getWindow().setStatusBarColor(Color.TRANSPARENT);
-            } else {
-                getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            }
-        }
     }
 
     protected Dialog onCreateDialog(int id) {
@@ -419,6 +506,11 @@ public class MainActivity extends AppCompatActivity implements MainContract.IMai
             }
         }
     };
+
+    public static Date convertUnixTimestampToDate(long timestamp) {
+        Date date = new Date(timestamp * 1000L);
+        return date;
+    }
 
     @Override
     protected void onStop(){

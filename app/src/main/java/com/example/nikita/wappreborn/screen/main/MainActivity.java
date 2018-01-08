@@ -43,15 +43,16 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     private static final int ID_RAIN = 5;
     private static final int ID_DRIZZLE = 3;
     private static final int ID_THUNDER = 2;
-    private static final int BEGINNING_OF_DAY_NAME = 4;
+    /*private static final int BEGINNING_OF_DAY_NAME = 4;
     private static final int END_OF_DAY_NAME = 11;
     private static final int BEGINNING_OF_DAY_NAME_FROM_API = 0;
-    private static final int END_OF_DAY_NAME_FROM_API = 3;
+    private static final int END_OF_DAY_NAME_FROM_API = 3;*/
     private static final double CONST_FOR_TRANSLATION_TEMPERATURE_1 = 1.8;
     private static final double CONST_FOR_TRANSLATION_TEMPERATURE_2 = 459.67;
-    private static final int CONST_FOR_TRANSLATION_TEMPERATURE_3 = 32;
+    private static final double CONST_FOR_TRANSLATION_TEMPERATURE_3 = 32;
     private static final double CONST_FOR_TRANSLATION_TEMPERATURE_4 = 0.55555555556;
-    private static final String CONDITION_FROM_API_LIGHT_SNOW = "light snow";
+
+    /*private static final String CONDITION_FROM_API_LIGHT_SNOW = "light snow";
     private static final String CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW = "light rain and snow";
     private static final String CONDITION_FROM_API_LIGHT_SHOWER_SNOW = "light shower snow";
     private static final String CONDITION_FROM_API_SNOW = "snow";
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     private static final String CONDITION_FROM_API_HEAVY_SHOWER_SNOW = "heavy shower snow";
     private static final String CONDITION_FROM_API_LIGHT_RAIN = "light rain";
     private static final String CONDITION_FROM_API_MODERATE_RAIN = "moderate rain";
-    private final static String SAVED_TEXT = "saved_text";
+    private final static String SAVED_TEXT = "saved_text";*/
     private static final String MONDAY = "Mon";
     private static final String TUESDAY = "Tue";
     private static final String WEDNESDAY = "Wed";
@@ -142,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     @Override
     public void showNetworkConnectionError() {
-        showDialog(CONNECTION_ERROR);
+        showDialog(getResources().getInteger(R.integer.CONNECTION_ERROR));
     }
 
     @Override
@@ -270,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     public void loadCityToView() {
         mPref = getPreferences(MODE_PRIVATE);
-        String savedText = mPref.getString(SAVED_TEXT, "");
+        String savedText = mPref.getString(getResources().getString(R.string.SAVED_TEXT), "");
         mCityEditText.setText(savedText);
     }
 
@@ -298,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         Date date = convertUnixTimestampToDate(dateLong);
         String dateStr = date.toString();
         String dayOfWeek = "";
-        switch (dateStr.substring(BEGINNING_OF_DAY_NAME_FROM_API, END_OF_DAY_NAME_FROM_API)) {
+        switch (dateStr.substring(getResources().getInteger(R.integer.BEGINNING_OF_DAY_NAME_FROM_API), getResources().getInteger(R.integer.END_OF_DAY_NAME_FROM_API))) {
             case MONDAY:
                 dayOfWeek = "Monday";
                 break;
@@ -321,7 +322,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
                 dayOfWeek = "Sunday";
                 break;
         }
-        return dateStr.substring(BEGINNING_OF_DAY_NAME, END_OF_DAY_NAME) + " " + dayOfWeek;
+        return dateStr.substring(getResources().getInteger(R.integer.BEGINNING_OF_DAY_NAME),
+                getResources().getInteger(R.integer.END_OF_DAY_NAME)) + " " + dayOfWeek;
     }
 
     public String getCity() {
@@ -421,23 +423,28 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
                     break;
             }
         }
-        if (mCondition.equals(CONDITION_FROM_API_LIGHT_SNOW) || mCondition.equals(CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW) || mCondition.equals(CONDITION_FROM_API_LIGHT_SHOWER_SNOW)) {
+        if (mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_LIGHT_SNOW))
+                || mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW))
+                || mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_LIGHT_SHOWER_SNOW))) {
             mIconImageId = R.drawable.smallsnow;
             mBackgroundImageId = R.drawable.snowbackground;
         }
-        else if (mCondition.equals(CONDITION_FROM_API_SNOW) || mCondition.equals(CONDITION_FROM_API_RAIN_AND_SNOW) || mCondition.equals(CONDITION_FROM_API_SHOWER_SNOW)) {
+        else if (mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_SNOW))
+                || mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_RAIN_AND_SNOW))
+                || mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_SHOWER_SNOW))) {
             mIconImageId = R.drawable.snow;
             mBackgroundImageId = R.drawable.snowbackground;
         }
-        else if (mCondition.equals(CONDITION_FROM_API_HEAVY_SNOW) || mCondition.equals(CONDITION_FROM_API_HEAVY_SHOWER_SNOW)) {
+        else if (mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_HEAVY_SNOW))
+                || mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_HEAVY_SHOWER_SNOW))) {
             mIconImageId = R.drawable.heavysnow;
             mBackgroundImageId = R.drawable.snowbackground;
         }
-        else if (mCondition.equals(CONDITION_FROM_API_LIGHT_RAIN)) {
+        else if (mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_LIGHT_RAIN))) {
             mIconImageId = R.drawable.rain;
             mBackgroundImageId = R.drawable.drizzlebackground;
         }
-        else if (mCondition.equals(CONDITION_FROM_API_MODERATE_RAIN)) {
+        else if (mCondition.equals(getResources().getString(R.string.CONDITION_FROM_API_MODERATE_RAIN))) {
             mIconImageId = R.drawable.drizzle;
             mBackgroundImageId = R.drawable.rainbackground;
         }
@@ -454,7 +461,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         try {
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(getApplicationContext(),
                     Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return null;
             }
@@ -478,7 +486,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     public void saveCityFromView() {
         mPref = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor ed = mPref.edit();
-        ed.putString(SAVED_TEXT, mCityEditText.getText().toString());
+        ed.putString(getResources().getString(R.string.SAVED_TEXT), mCityEditText.getText().toString());
         ed.commit();
     }
 

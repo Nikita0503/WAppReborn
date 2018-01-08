@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="CONNECTION_ERROR">1</integer>
+    <integer name="BEGINNING_OF_DAY_NAME">4</integer>
+    <integer name="END_OF_DAY_NAME">11</integer>
+    <integer name="BEGINNING_OF_DAY_NAME_FROM_API">0</integer>
+    <integer name="END_OF_DAY_NAME_FROM_API">3</integer>
+
+</resources>

@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">WAppReborn</string>
+    <string name="tempDay">Day</string>
+    <string name="tempNight">Night</string>
+    <string name="city">City</string>
+    <string name="date">Date</string>
+    <string name="condition">Condition</string>
+    <string name="less">◁</string>
+    <string name="more">▷</string>
+    <string name="check">Check</string>
+    <string name="error">Error</string>
+    <string name="internetConnection">No internet connection. Go to the settings for the Wi-Fi?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="title_activity_map">Map</string>
+    <string name="CONDITION_FROM_API_LIGHT_SNOW">light snow</string>
+    <string name="CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW">light rain and snow</string>
+    <string name="CONDITION_FROM_API_LIGHT_SHOWER_SNOW">light shower snow</string>
+    <string name="CONDITION_FROM_API_SNOW">snow</string>
+    <string name="CONDITION_FROM_API_RAIN_AND_SNOW">rain and snow</string>
+    <string name="CONDITION_FROM_API_SHOWER_SNOW">shower snow</string>
+    <string name="CONDITION_FROM_API_HEAVY_SNOW">heavy snow</string>
+    <string name="CONDITION_FROM_API_HEAVY_SHOWER_SNOW">heavy shower snow</string>
+    <string name="CONDITION_FROM_API_LIGHT_RAIN">light rain</string>
+    <string name="CONDITION_FROM_API_MODERATE_RAIN">moderate rain</string>
+    <string name="SAVED_TEXT">saved_text</string>
+</resources>

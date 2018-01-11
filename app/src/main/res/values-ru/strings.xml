@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">WAppReborn</string>
+    <string name="tempDay">День</string>
+    <string name="tempNight">Ночь</string>
+    <string name="city">Город</string>
+    <string name="date">Дата</string>
+    <string name="condition">Состояние</string>
+    <string name="less">◁</string>
+    <string name="more">▷</string>
+    <string name="check">Запрос</string>
+    <string name="error">Ошибка</string>
+    <string name="internetConnection">Нет соединения с интернетом, перейти к настройкам Wi-Fi?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="title_activity_map">Карта</string>
+    <string name="CONDITION_FROM_API_LIGHT_SNOW">Легкий снег</string>
+    <string name="CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW">Легкий дождь со снегом</string>
+    <string name="CONDITION_FROM_API_LIGHT_SHOWER_SNOW">Легкий лопатый снег</string>
+    <string name="CONDITION_FROM_API_SNOW">Снег</string>
+    <string name="CONDITION_FROM_API_RAIN_AND_SNOW">Дождь со снегом</string>
+    <string name="CONDITION_FROM_API_SHOWER_SNOW">Снег</string>
+    <string name="CONDITION_FROM_API_HEAVY_SNOW">Сильный снег</string>
+    <string name="CONDITION_FROM_API_HEAVY_SHOWER_SNOW">Сильный лопатый снег</string>
+    <string name="CONDITION_FROM_API_LIGHT_RAIN">Легкий дождь</string>
+    <string name="CONDITION_FROM_API_MODERATE_RAIN">Умеренный дождь</string>
+    <string name="SAVED_TEXT">saved_text</string>
+</resources>

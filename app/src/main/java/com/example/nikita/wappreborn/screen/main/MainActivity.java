@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -117,21 +118,21 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     @Override
     public void defineViews() {
-        mDateTextView =  findViewById(R.id.textViewDate);
-        mTempDayTextView = findViewById(R.id.textViewDay);
-        mTempNightTextView = findViewById(R.id.textViewNight);
-        mPlaceTextView = findViewById(R.id.textViewPlace);
-        mConditionTextView = findViewById(R.id.textViewCondition);
-        mLessTextView = findViewById(R.id.textViewLess);
-        mMoreTextView = findViewById(R.id.textViewMore);
-        mIconImageView = findViewById(R.id.imageView);
-        mLocationMarkerImageView = findViewById(R.id.imageViewMarker);
-        mMapImageView = findViewById(R.id.imageViewMap);
-        mCityEditText = findViewById(R.id.editText);
-        mCheckButton = findViewById(R.id.buttonCheck);
-        mPlusButton = findViewById(R.id.button2);
-        mMinusButton = findViewById(R.id.button3);
-        mLayout = findViewById(R.id.activity_main);
+        mDateTextView = (TextView) findViewById(R.id.textViewDate);
+        mTempDayTextView = (TextView) findViewById(R.id.textViewDay);
+        mTempNightTextView = (TextView) findViewById(R.id.textViewNight);
+        mPlaceTextView = (TextView) findViewById(R.id.textViewPlace);
+        mConditionTextView = (TextView) findViewById(R.id.textViewCondition);
+        mLessTextView = (TextView) findViewById(R.id.textViewLess);
+        mMoreTextView = (TextView) findViewById(R.id.textViewMore);
+        mIconImageView = (ImageView) findViewById(R.id.imageView);
+        mLocationMarkerImageView = (ImageView) findViewById(R.id.imageViewMarker);
+        mMapImageView = (ImageView) findViewById(R.id.imageViewMap);
+        mCityEditText = (EditText) findViewById(R.id.editText);
+        mCheckButton = (Button) findViewById(R.id.buttonCheck);
+        mPlusButton = (Button) findViewById(R.id.button2);
+        mMinusButton = (Button) findViewById(R.id.button3);
+        mLayout = (RelativeLayout) findViewById(R.id.activity_main);
         Typeface typeFace = Typeface.createFromAsset(getAssets(), "fonts/Hattori_Hanzo.otf");
         mPlaceTextView.setTypeface(typeFace);
         mTempDayTextView.setTypeface(typeFace);
@@ -199,8 +200,13 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         {
             @Override
             public void onClick(View view) {
-                Coordinates coord = getCoordinates();
-                mMainPresenter.fetchCityWithCoordinates(coord);
+                try {
+                    Coordinates coord = getCoordinates();
+                    mMainPresenter.fetchCityWithCoordinates(coord);
+                }catch (Exception c){
+                    Log.d(getResources().getString(R.string.error), c.getLocalizedMessage());
+                    showEnteredCityError();
+                }
             }
         });
 
@@ -458,24 +464,18 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     public Coordinates getCoordinates() {
         Coordinates coord;
-        try {
-            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(getApplicationContext(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            coord = new Coordinates(latitude, longitude);
-            return coord;
-        }
-        catch (Exception c){
-            showNetworkConnectionError();
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return null;
         }
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        coord = new Coordinates(latitude, longitude);
+        return coord;
     }
 
     public String getCityFromView() {

@@ -104,6 +104,7 @@ public class Presenter implements MainContract.Presenter{
         Log.d(ERROR, e.getLocalizedMessage());
         if(e instanceof HttpException){
             int exception = ((HttpException) e).code();
+            Log.d(ERROR, String.valueOf(exception));
             switch (exception){
                 case 400:
                     mMainView.showEmptyLineError();
@@ -111,9 +112,9 @@ public class Presenter implements MainContract.Presenter{
                 case 404:
                     mMainView.showEnteredCityError();
                     break;
-                default:
-                    mMainView.showNetworkConnectionError();
             }
+        }else{
+            mMainView.showNetworkConnectionError();
         }
     }
 

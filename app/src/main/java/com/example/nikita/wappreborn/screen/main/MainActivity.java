@@ -469,15 +469,18 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             return null;
         }
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
-
-        coord = new Coordinates(latitude, longitude);
-        return coord;
+        if(location!=null) {
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            coord = new Coordinates(latitude, longitude);
+            return coord;
+        }else{
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.location_error), Toast.LENGTH_SHORT).show();
+            return null;
+        }
     }
 
     public String getCityFromView() {

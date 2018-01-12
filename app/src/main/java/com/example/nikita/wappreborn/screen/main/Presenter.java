@@ -73,7 +73,9 @@ public class Presenter implements MainContract.Presenter{
                     }
                     @Override
                     public void onError(Throwable e) {
-                        handleErrors(e);
+                        if(!(e instanceof HttpException)){
+                            mMainView.showNetworkConnectionError();
+                        }
                     }
                     });
         mDisposables.add(disposable);

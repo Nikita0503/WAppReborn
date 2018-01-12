@@ -29,6 +29,7 @@
     <string name="title_activity_map">Map</string>
     <string name="entered_city_error">Entered city error</string>
     <string name="unknown_city_error">Unknown city</string>
+    <string name="location_error">Unknown location</string>
     <string name="marker">Marker in city</string>
     <string name="CONDITION_FROM_API_LIGHT_SNOW">light snow</string>
     <string name="CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW">light rain and snow</string>

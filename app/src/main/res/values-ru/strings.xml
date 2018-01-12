@@ -29,6 +29,7 @@
     <string name="title_activity_map">Карта</string>
     <string name="entered_city_error">Город введен некоректно</string>
     <string name="unknown_city_error">Неизвесный город</string>
+    <string name="location_error">Неизвестное местоположение</string>
     <string name="marker">Маркер на городе</string>
     <string name="CONDITION_FROM_API_LIGHT_SNOW">Легкий снег</string>
     <string name="CONDITION_FROM_API_LIGHT_RAIN_AND_SNOW">Легкий дождь со снегом</string>

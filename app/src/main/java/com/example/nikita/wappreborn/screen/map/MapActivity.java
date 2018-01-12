@@ -15,7 +15,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private double mLat;
     private double mLon;
-
     private GoogleMap mMap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +22,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         Intent intent = getIntent();
-        mLat = intent.getDoubleExtra("lat", 0);
-        mLon = intent.getDoubleExtra("lon", 0);
+        mLat = intent.getDoubleExtra(getResources().getResourceName(R.string.lat), 0);
+        mLon = intent.getDoubleExtra(getResources().getResourceName(R.string.lon), 0);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -46,7 +45,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         // Add a marker in Sydney and move the camera
         LatLng city = new LatLng(mLat, mLon);
-        mMap.addMarker(new MarkerOptions().position(city).title("Marker in city"));
+        mMap.addMarker(new MarkerOptions().position(city).title(getResources().getString(R.string.marker)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(city));
     }
 }

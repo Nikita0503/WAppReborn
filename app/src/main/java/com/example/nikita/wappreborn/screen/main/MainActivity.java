@@ -149,12 +149,12 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     @Override
     public void showEmptyLineError() {
-        Toast.makeText(getApplicationContext(), "Entered city error", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), getResources().getString(R.string.entered_city_error), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void showEnteredCityError() {
-        Toast.makeText(getApplicationContext(), "Unknown city", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), getResources().getString(R.string.unknown_city_error), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -181,8 +181,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     public void startMapActivity(){
         Intent intent = new Intent(getApplicationContext(), MapActivity.class);
-        intent.putExtra("lat", mLat);
-        intent.putExtra("lon", mLon);
+        intent.putExtra(getResources().getResourceName(R.string.lat), mLat);
+        intent.putExtra(getResources().getResourceName(R.string.lon), mLon);
         startActivity(intent);
     }
 
@@ -307,25 +307,25 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         String dayOfWeek = "";
         switch (dateStr.substring(getResources().getInteger(R.integer.BEGINNING_OF_DAY_NAME_FROM_API), getResources().getInteger(R.integer.END_OF_DAY_NAME_FROM_API))) {
             case MONDAY:
-                dayOfWeek = "Monday";
+                dayOfWeek = getResources().getString(R.string.monday);
                 break;
             case TUESDAY:
-                dayOfWeek = "Tuesday";
+                dayOfWeek = getResources().getString(R.string.tuesday);
                 break;
             case WEDNESDAY:
-                dayOfWeek = "Wednesday";
+                dayOfWeek = getResources().getString(R.string.wednesday);
                 break;
             case THURSDAY:
-                dayOfWeek = "Thursday";
+                dayOfWeek = getResources().getString(R.string.thursday);
                 break;
             case FRIDAY:
-                dayOfWeek = "Friday";
+                dayOfWeek = getResources().getString(R.string.friday);
                 break;
             case SATURDAY:
-                dayOfWeek = "Saturday";
+                dayOfWeek = getResources().getString(R.string.saturday);
                 break;
             case SUNDAY:
-                dayOfWeek = "Sunday";
+                dayOfWeek = getResources().getString(R.string.sunday);
                 break;
         }
         return dateStr.substring(getResources().getInteger(R.integer.BEGINNING_OF_DAY_NAME),
@@ -342,10 +342,10 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         int temp = (int) ((((tempDouble * CONST_FOR_TRANSLATION_TEMPERATURE_1 - CONST_FOR_TRANSLATION_TEMPERATURE_2))
                 - CONST_FOR_TRANSLATION_TEMPERATURE_3) * CONST_FOR_TRANSLATION_TEMPERATURE_4);
         if (temp > 0) {
-            return String.valueOf("Day +" + temp + "°C");
+            return String.valueOf(getResources().getString(R.string.day_positive) + temp + getResources().getString(R.string.cesium));
         }
         else{
-            return String.valueOf(String.valueOf("Day " + temp + "°C"));
+            return String.valueOf(String.valueOf(getResources().getString(R.string.day_negative) + " " + temp + getResources().getString(R.string.cesium)));
         }
     }
 
@@ -354,10 +354,10 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         int temp = (int) ((((tempDouble * CONST_FOR_TRANSLATION_TEMPERATURE_1 - CONST_FOR_TRANSLATION_TEMPERATURE_2))
                 - CONST_FOR_TRANSLATION_TEMPERATURE_3) * CONST_FOR_TRANSLATION_TEMPERATURE_4);
         if (temp > 0) {
-            return String.valueOf("Night +" + temp + "°C");
+            return String.valueOf(getResources().getString(R.string.night_positive)  + temp + getResources().getString(R.string.cesium));
         }
         else {
-            return String.valueOf("Night " + temp + "°C");
+            return String.valueOf(getResources().getString(R.string.night_negetive) + " " + temp + getResources().getString(R.string.cesium));
         }
     }
 

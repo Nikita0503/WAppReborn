@@ -21,7 +21,7 @@ public interface MainContract extends BaseContract {
 
     interface Presenter extends BasePresenter{
         void fetchWeather(String city);
-        void fetchCoordinatesForMapActivity(String city);
-        void fetchCityWithCoordinates(Coordinates coord);
+        void fetchCoordinatesByCity(String city);
+        void fetchCityByCoordinates(Coordinates coord);
     }
 }

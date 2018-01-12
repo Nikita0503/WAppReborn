@@ -59,7 +59,7 @@ public class Presenter implements MainContract.Presenter{
     }
 
     @Override
-    public void fetchCityWithCoordinates(Coordinates coord) {
+    public void fetchCityByCoordinates(Coordinates coord) {
         double lat = coord.latitude;
         double lon = coord.longitude;
         Disposable disposable = mApiUtils.getAnswers(lat, lon)
@@ -80,7 +80,7 @@ public class Presenter implements MainContract.Presenter{
     }
 
     @Override
-    public void fetchCoordinatesForMapActivity(String city) {
+    public void fetchCoordinatesByCity(String city) {
         Disposable disposable = mApiUtils.getAnswers(city)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

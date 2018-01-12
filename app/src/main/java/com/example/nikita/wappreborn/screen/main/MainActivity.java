@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             @Override
             public void onClick(View view) {
                 String city = getCityFromView();
-                mMainPresenter.fetchCoordinatesForMapActivity(city);
+                mMainPresenter.fetchCoordinatesByCity(city);
             }
         });
 
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             public void onClick(View view) {
                 try {
                     Coordinates coord = getCoordinates();
-                    mMainPresenter.fetchCityWithCoordinates(coord);
+                    mMainPresenter.fetchCityByCoordinates(coord);
                 }catch (Exception c){
                     Log.d(getResources().getString(R.string.error), c.getLocalizedMessage());
                     showEnteredCityError();
@@ -469,11 +469,13 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
             return null;
         }
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
+
         coord = new Coordinates(latitude, longitude);
         return coord;
     }

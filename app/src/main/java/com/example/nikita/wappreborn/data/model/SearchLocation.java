@@ -16,11 +16,11 @@ public class SearchLocation {
         return cod;
     }
 
-    public Double getMessage() {
+    public double getMessage() {
         return message;
     }
 
-    public Integer getCnt() {
+    public int getCnt() {
         return cnt;
     }
 
